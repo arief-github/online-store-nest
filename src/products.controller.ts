@@ -29,8 +29,8 @@ export class ProductsController {
     }
 
     const viewData = {
-      title: `${product.name} - Online Store`,
-      subtitle: `${product.name} - Product Information`,
+      title: `${product.getName()} - Online Store`,
+      subtitle: `${product.getName()} - Product Information`,
       product,
     };
 
