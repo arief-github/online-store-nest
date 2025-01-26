@@ -1,46 +1,18 @@
 import { Render, Get, Controller, Param } from '@nestjs/common';
+import { ProductsService } from './models/product.service';
 
 @Controller('/products')
 export class ProductsController {
-  static products = [
-    {
-      id: '1',
-      name: 'TV',
-      description: 'Best tv',
-      image: 'game.png',
-      price: '1000',
-    },
-    {
-      id: '2',
-      name: 'iPhone',
-      description: 'Best iPhone',
-      image: 'safe.png',
-      price: '999',
-    },
-    {
-      id: '3',
-      name: 'Chromecast',
-      description: 'Best Chromecast',
-      image: 'submarine.png',
-      price: '30',
-    },
-    {
-      id: '4',
-      name: 'Glasses',
-      description: 'Best Glasses',
-      image: 'game.png',
-      price: '100',
-    },
-  ];
+  constructor(private readonly productsService: ProductsService) {}
 
   @Get('/')
   @Render('products/index')
-  index() {
+  async index() {
     const viewData = [];
 
     viewData['title'] = 'Products - Online Store';
     viewData['subtitle'] = 'List of Product';
-    viewData['products'] = ProductsController.products;
+    viewData['products'] = await this.productsService.findAll();
 
     return {
       viewData: viewData,
@@ -49,27 +21,19 @@ export class ProductsController {
 
   @Get('/:id')
   @Render('products/show')
-  show(@Param('id') id: string) {
-    const product = ProductsController.products.find((p) => p.id === id);
+  async show(@Param() params) {
+    const product = await this.productsService.findOne(params.id);
     if (!product) {
-      // Handle product not found case
-      return {
-        viewData: {
-          title: 'Product Not Found - Online Store',
-          subtitle: 'Product Not Found',
-          product: null,
-        },
-      };
+      // Throw a redirect error instead
+      throw new Error('Redirect to /products'); // Use a redirect filter instead if needed
     }
 
-    const viewData = [];
-
-    viewData['title'] = product.name + ' - Online Store';
-    viewData['subtitle'] = product.name + ' - Product Information';
-    viewData['product'] = product;
-
-    return {
-      viewData: viewData,
+    const viewData = {
+      title: `${product.name} - Online Store`,
+      subtitle: `${product.name} - Product Information`,
+      product,
     };
+
+    return { viewData };
   }
 }
